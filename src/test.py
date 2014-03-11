@@ -2,7 +2,7 @@
 
 import serial
 
-ser = serial.Serial('/dev/ttyUSB0', 9600, timeout=1)
+ser = serial.Serial('/dev/ttyUSB0', 1200, timeout=1)
 
 # Example 1
 ba = bytearray([0xf1, 				# Leading code
@@ -17,5 +17,7 @@ ba = bytearray([0xf1, 				# Leading code
 				0x9f, 				# End Fat
 				0x91, 				# Pause
 				0xf0, 0xff])		# End code
-ser.write(ba)
+
+while 1:
+	ser.write(ba)
 ser.close()
