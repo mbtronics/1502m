@@ -1,0 +1,31 @@
+RS232.EXE is a DOS program, it can be run in dosbox.
+
+Instructions for Linux
+----------------------
+
+To use a real serial port, configure dosbox (~/.dosbox/dosbox-0.74.conf) like this:
+
+	[serial]
+	serial1=directserial realport:ttyUSB0
+
+If you want to sniff the data on that serial port, use socat:
+
+	sudo socat /dev/ttyUSB0,raw,echo=0 SYSTEM:'tee input.txt | socat - "PTY,link=/dev/ttyV0,raw,echo=0,waitslave" | tee output.txt'
+
+This will intercept all traffic between /dev/ttyV0 and /dev/ttyUSB0.
+To use the virtual serial port in dosbox (don't forget to make the virtual port usable by a regular user: 'sudo chmod 777 /dev/ttyV0'):
+
+	[serial]
+	serial1=directserial realport:ttyV0
+
+In dosbox:
+
+	keyb be
+	mount c <dir git repo>
+	cd doc
+	cd diskette
+	rs232
+
+All serial output will be send to /dev/ttyUSB0 and to output.txt (and the input to input.txt).
+
+

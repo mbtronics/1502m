@@ -1,0 +1,18 @@
+Leading				Tail			
+							Clock set	ESC GR DT CK TM
+Open <	ctrl f			Wipe <	ctrl s?		Clock		ctrl z	
+Open >	ctrl g			Wipe >	ctrl t		Date
+Open ^	ctrl h			Wipe ^	ctrl u		Graphic
+Open V	ctrl i			Wipe V	ctrl v		Timer
+Open <>	ctrl j			Wipe <>	ctrl w		Lock
+Open >< ctrl k			Wipe ><	ctrl x		Flash
+Shift <	ctrl l			Rotate ^ ctrl y?	Speed	code #
+Shift >	ctrl a	(rev)		Rotate V ctrl n		Stop	ctrl s ?
+							Dir
+SCRA ^	ctrl b			SCRD ^	ctrl o		Fat  code-msg-code
+SCRA V	ctrl c			SCRD V	ctrl p		Halt
+							End
+Appear	ctrl d			Clear	ctrl q		Delete	ESC DEL
+							Version
+Jumpon	ctrl e			Pauze	ctrl r
+

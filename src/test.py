@@ -2,22 +2,16 @@
 
 import serial
 
-ser = serial.Serial('/dev/ttyUSB0', 1200, timeout=1)
+ser = serial.Serial('/dev/ttyUSB1', 2400, timeout=1)
+fil = open('dump', 'w')
 
-# Example 1
-ba = bytearray([0xf1, 				# Leading code
-				0x00, 0x00, 		# Locked code
-				0x01, 				# Message mode
-				0x9e, '1', 			# Lowest speed
-				0x84, 'A', 			# Appear 'A'
-				0xa0, 'B', 0xa0,  	# Flash 'B'
-				0x9f, 				# Start Fat
-				'C', 				# 'C'
-				0xa0, 'D', 0xa0, 	# Flash 'D'
-				0x9f, 				# End Fat
-				0x91, 				# Pause
-				0xf0, 0xff])		# End code
 
-while 1:
-	ser.write(ba)
+text = "Hello World!"
+text += (80-len(text)) * " "
+text += "\r"
+
+ser.write(text)
+fil.write(text)
+
 ser.close()
+fil.close()
