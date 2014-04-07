@@ -2,6 +2,7 @@
 
 import serial
 import time
+import requests
 
 class Special:
 	#Use these before text
@@ -20,7 +21,7 @@ class Special:
 
 	#Use these after text
 	RotateUp	= bytearray({12})
-	#???		= bytearray({13})
+	Enter		= bytearray({13})
 	RotateDown	= bytearray({14})
 	ScrollUp	= bytearray({15})
 	EndScrDown	= bytearray({16})	
@@ -49,22 +50,42 @@ def Speed(Val):
 		raise Exception("Invalid speed")
 	return Special.Speed + str(Val)
 
+def SendToDisplay(Message):
+	for c in str(Message):
+		ser.write(c)
+
+	ser.write(Special.Enter)
+
+
 ser = serial.Serial('/dev/ttyUSB0', 2400, bytesize=8, parity='E', stopbits=1, timeout=None)
 
-text = ""
-text += Special.OpenEdges
-text += "ELECTRONICS:LAB"
-text += Special.Pause + Special.Pause
-text += Special.WipeUp
-text += " elke maandag van 18u-21u"
-text += Special.RotateDown
-text += Special.Pause + Special.Pause
-text += Special.Clock
-text += Special.Pause + Special.Pause + Special.Pause	
 
-for c in str(text):
-	ser.write(c)
+#text = ""
+#text += Special.OpenEdges
+#text += "ELECTRONICS:LAB"
+#text += Special.Pause + Special.Pause
+#text += Special.WipeUp
+#text += " elke maandag van 18u-21u"
+#text += Special.RotateDown
+#text += Special.Pause + Special.Pause
 
-ser.write("\r")
+ServerUrl = "http://185.27.174.114/MessageServer.php"
+StartMessage = "Post uw bericht op " + ServerUrl
+
+Messages = [StartMessage]
+
+while 1:
+	NewMessages = requests.get(ServerUrl + "?messages").text
+
+	if NewMessages.strip() != "":
+		Messages = [StartMessage]
+		Messages.extend(NewMessages.split("\n"))
+
+	for Message in Messages:
+		Message = Message.strip()
+		if Message != "":
+			print Message
+			SendToDisplay(Message)
+			time.sleep(10)
 
 ser.close()
