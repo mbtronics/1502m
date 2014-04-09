@@ -10,17 +10,9 @@ if (Isset($_POST['submit']))
 
 if (Isset($_GET['messages']))
 {
-	if (file_exists($MessageFile))
+	if (file_exists($MessageFile))	
 	{
-		$File = fopen($MessageFile, 'r');
-
-		while(!feof($File))
-		{
-			$line = fgets($File);
-			echo $line;
-		}
-
-		fclose($File);
+		echo file_get_contents($MessageFile);
 		unlink($MessageFile);
 	}
 
@@ -38,7 +30,7 @@ if (Isset($_GET['messages']))
 
 <form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
 	<input type="text" name="message"><br>
-	<input type="submit" name="submit" value="verzenden">
+	<input type="submit" name="submit" value="Submit">
 </form>
 
 </body>

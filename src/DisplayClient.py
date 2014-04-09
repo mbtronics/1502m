@@ -3,6 +3,9 @@
 import serial
 import time
 import requests
+import thread
+import sys
+import Queue
 
 class Special:
 	#Use these before text
@@ -52,13 +55,15 @@ def Speed(Val):
 
 def SendToDisplay(Message):
 	for c in str(Message):
-		ser.write(c)
+		SerialPort.write(c)
+	SerialPort.write(Special.Enter)
 
-	ser.write(Special.Enter)
-
-
-ser = serial.Serial('/dev/ttyUSB0', 2400, bytesize=8, parity='E', stopbits=1, timeout=None)
-
+def GetData():
+	while 1:
+		Data = requests.get(ServerUrl + "?messages").text
+		if Data.strip() != "":
+			MessageQueue.put(Data.strip().split("\n"))
+		time.sleep(5)
 
 #text = ""
 #text += Special.OpenEdges
@@ -69,23 +74,22 @@ ser = serial.Serial('/dev/ttyUSB0', 2400, bytesize=8, parity='E', stopbits=1, ti
 #text += Special.RotateDown
 #text += Special.Pause + Special.Pause
 
-ServerUrl = "http://185.27.174.114/MessageServer.php"
+#ServerUrl = "http://185.27.174.114/MessageServer.php"
+ServerUrl = "http://localhost/src/MessageServer.php"
 StartMessage = "Post uw bericht op " + ServerUrl
 
-Messages = [StartMessage]
+SerialPort = serial.Serial('/dev/ttyUSB0', 2400, bytesize=8, parity='E', stopbits=1, timeout=None)
+MessageQueue = Queue.Queue()
+thread.start_new_thread(GetData, ())
 
-while 1:
-	NewMessages = requests.get(ServerUrl + "?messages").text
+while True:
+	try:
+		NewMessages = MessageQueue.get(True, 10)
+		print NewMessages
+	except Queue.Empty:
+		pass
+	except KeyboardInterrupt:
+		print "Exiting!"
+		SerialPort.close()
+		sys.exit()
 
-	if NewMessages.strip() != "":
-		Messages = [StartMessage]
-		Messages.extend(NewMessages.split("\n"))
-
-	for Message in Messages:
-		Message = Message.strip()
-		if Message != "":
-			print Message
-			SendToDisplay(Message)
-			time.sleep(10)
-
-ser.close()
