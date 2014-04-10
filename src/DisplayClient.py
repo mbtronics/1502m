@@ -6,6 +6,23 @@ import requests
 import thread
 import sys
 import Queue
+import collections
+
+### SETTINGS ###
+#ServerUrl = "http://185.27.174.114/MessageServer.php"
+ServerUrl = "http://localhost/src/MessageServer.php"
+SerialDevice = "/dev/ttyUSB0"
+BaudRate = 2400
+StartMessage = "Post uw bericht op " + ServerUrl
+MaxMessages = 3
+################
+
+print "Welcome to the 1502m Message Display client"
+print "-------------------------------------------"
+print "Message Server is " + ServerUrl
+print "Connecting to LED display on " + SerialDevice + " at " + str(BaudRate) + " baud"
+print "Maximum " + str(MaxMessages) + " messsages in queue"
+print
 
 class Special:
 	#Use these before text
@@ -24,7 +41,6 @@ class Special:
 
 	#Use these after text
 	RotateUp	= bytearray({12})
-	Enter		= bytearray({13})
 	RotateDown	= bytearray({14})
 	ScrollUp	= bytearray({15})
 	EndScrDown	= bytearray({16})	
@@ -36,9 +52,9 @@ class Special:
 	WipeEdges	= bytearray({24})
 
 	#Control signals
+	Enter		= bytearray({13})
 	Clear		= bytearray({17})
 	Pause		= bytearray({18})
-
 	End			= bytearray({25})
 	Clock		= bytearray({26})
 	Halt		= bytearray({27})
@@ -53,43 +69,47 @@ def Speed(Val):
 		raise Exception("Invalid speed")
 	return Special.Speed + str(Val)
 
+# Send the Message char per char to the display
+# Don't send the string at once, it's to fast for the display
 def SendToDisplay(Message):
 	for c in str(Message):
 		SerialPort.write(c)
+
+	# Confirm the new Message
 	SerialPort.write(Special.Enter)
 
-def GetData():
+def ShowMessages():
 	while 1:
-		Data = requests.get(ServerUrl + "?messages").text
-		if Data.strip() != "":
-			MessageQueue.put(Data.strip().split("\n"))
-		time.sleep(5)
+		# Make a local copy because the list be changed by the main thread,
+		# reverse the list because we want the newest messages first.
+		Messages = list(reversed(MessageList))
+		Messages.append(StartMessage)
 
-#text = ""
-#text += Special.OpenEdges
-#text += "ELECTRONICS:LAB"
-#text += Special.Pause + Special.Pause
-#text += Special.WipeUp
-#text += " elke maandag van 18u-21u"
-#text += Special.RotateDown
-#text += Special.Pause + Special.Pause
+		# Print every message ...
+		for Message in Messages:
+			SendToDisplay(Message)
+			print Message
+			time.sleep(5)
 
-#ServerUrl = "http://185.27.174.114/MessageServer.php"
-ServerUrl = "http://localhost/src/MessageServer.php"
-StartMessage = "Post uw bericht op " + ServerUrl
+# Maximum x messages in deque
+# A deque is a special list: if you add more then the max allowed items, older items are removed.
+# This way we always have the x newest messages
+MessageList = collections.deque(maxlen=MaxMessages)
 
-SerialPort = serial.Serial('/dev/ttyUSB0', 2400, bytesize=8, parity='E', stopbits=1, timeout=None)
-MessageQueue = Queue.Queue()
-thread.start_new_thread(GetData, ())
+# Open serial port
+SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopbits=1, timeout=None)
 
+# Start ShowMessages thread
+thread.start_new_thread(ShowMessages, ())
+
+# Endless loop: end the program with CTRL-C
 while True:
-	try:
-		NewMessages = MessageQueue.get(True, 10)
-		print NewMessages
-	except Queue.Empty:
-		pass
-	except KeyboardInterrupt:
-		print "Exiting!"
-		SerialPort.close()
-		sys.exit()
+	# Request new messages from server
+	Data = requests.get(ServerUrl + "?messages").text
 
+	# Add them to the MessageList, if there are any
+	if Data.strip() != "":
+		MessageList.extend(Data.strip().split("\n"))
+
+	# We have to sleep a bit or we will be using 100% CPU
+	time.sleep(1)
