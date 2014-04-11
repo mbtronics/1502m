@@ -32,6 +32,13 @@ if (Isset($_GET['messages']))
 	exit;
 }
 
+# Client script has posted a livestream image
+if (Isset($_FILES["live_jpg"]))
+{
+	move_uploaded_file($_FILES['live_jpg']['tmp_name'], $_FILES["live_jpg"]["name"]);
+	exit;
+}
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -56,7 +63,23 @@ if (Isset($_GET['messages']))
 			<input type="submit" name="submit" value="Submit">
 		</form>
 		<br>
-		<img src="LEDdisplay.jpg">
+		<canvas id="mjpeg" width="640px" height="480px" style="border:1px solid #d3d3d3"></canvas>
+		<script language="JavaScript">
+			var Mjpeg = document.getElementById('mjpeg').getContext('2d');
+			var Img = new Image();
+
+			Img.onload = function() {
+				Mjpeg.drawImage(Img, 0, 0);
+		  	};
+
+		  	Img.src = "live.jpg";
+
+			window.setInterval("refreshCanvas()", 500);
+			function refreshCanvas(){
+				Img.src = "live.jpg?" + Date.now();
+				Mjpeg.drawImage(img, 0, 0);
+			};
+		</script>
 	</div>
 </div>
 

@@ -11,6 +11,7 @@ import collections
 ### SETTINGS ###
 #ServerUrl = "http://185.27.174.114/MessageServer.php"
 ServerUrl = "http://localhost/src/MessageServer.php"
+JpegUrl = "http://10.0.0.15/live.jpg"
 SerialDevice = "/dev/ttyUSB0"
 BaudRate = 2400
 StartMessage = "Post uw bericht op " + ServerUrl
@@ -19,7 +20,8 @@ MaxMessages = 3
 
 print "Welcome to the 1502m Message Display client"
 print "-------------------------------------------"
-print "Message Server is " + ServerUrl
+print "Message Server: " + ServerUrl
+print "Livestream JPEG URL: " + JpegUrl
 print "Connecting to LED display on " + SerialDevice + " at " + str(BaudRate) + " baud"
 print "Maximum " + str(MaxMessages) + " messsages in queue"
 print
@@ -91,6 +93,14 @@ def ShowMessages():
 			print Message
 			time.sleep(5)
 
+def LiveStream():
+	while 1:
+		# First download the image from JpegUrl
+		JpegData = requests.get(JpegUrl, stream=True)
+		# Then upload the image to ServerUrl
+		requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()})
+		time.sleep(0.5)
+
 # Maximum x messages in deque
 # A deque is a special list: if you add more then the max allowed items, older items are removed.
 # This way we always have the x newest messages
@@ -101,6 +111,9 @@ SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopb
 
 # Start ShowMessages thread
 thread.start_new_thread(ShowMessages, ())
+
+# Start LiveStream thread
+thread.start_new_thread(LiveStream, ())
 
 # Endless loop: end the program with CTRL-C
 while True:
