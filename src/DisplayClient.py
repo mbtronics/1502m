@@ -93,11 +93,11 @@ def ShowMessages():
 		for Message in Messages:
 			SendToDisplay(Message)
 			print colored(Message, "yellow")
-			time.sleep(5)
+			time.sleep(15)
 
 def LiveStream():
 	# Default sleep between images
-	DefaultSleep = 0.5
+	DefaultSleep = 0.1
 
 	while 1:
 		# First download the image from JpegUrl, 5s timeout
