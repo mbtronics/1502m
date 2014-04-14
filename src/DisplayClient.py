@@ -9,18 +9,19 @@ import Queue
 import collections
 
 ### SETTINGS ###
-#ServerUrl = "http://185.27.174.114/MessageServer.php"
-ServerUrl = "http://localhost/src/MessageServer.php"
+ServerUrl = "http://185.27.174.114/1502m/src/webpage/MessageServer.php"
+ShortUrl = "http://tinyurl.com/BudaCam"
 JpegUrl = "http://10.0.0.15/live.jpg"
 SerialDevice = "/dev/ttyUSB0"
 BaudRate = 2400
-StartMessage = "Post uw bericht op " + ServerUrl
+StartMessage = "Post uw bericht op " + ShortUrl
 MaxMessages = 3
 ################
 
 print "Welcome to the 1502m Message Display client"
 print "-------------------------------------------"
 print "Message Server: " + ServerUrl
+print "Short URL: " + ShortUrl
 print "Livestream JPEG URL: " + JpegUrl
 print "Connecting to LED display on " + SerialDevice + " at " + str(BaudRate) + " baud"
 print "Maximum " + str(MaxMessages) + " messsages in queue"
