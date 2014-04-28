@@ -12,7 +12,7 @@ from termcolor import colored
 ### SETTINGS ###
 ServerUrl = "http://185.27.174.114/1502m/src/webpage/MessageServer.php"
 ShortUrl = "http://tinyurl.com/BudaCam"
-JpegUrl = "http://10.0.0.15/live.jpg"
+JpegUrl = "http://172.23.5.2/live.jpg"
 SerialDevice = "/dev/ttyUSB0"
 BaudRate = 2400
 StartMessage = "Post uw bericht op " + ShortUrl
@@ -97,7 +97,7 @@ def ShowMessages():
 
 def LiveStream():
 	# Default sleep between images
-	DefaultSleep = 0.1
+	DefaultSleep = 0.5
 
 	while 1:
 		# First download the image from JpegUrl, 5s timeout
