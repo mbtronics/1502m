@@ -7,20 +7,22 @@ import thread
 import sys
 import Queue
 import collections
+from termcolor import colored
 
 ### SETTINGS ###
-#ServerUrl = "http://185.27.174.114/MessageServer.php"
-ServerUrl = "http://localhost/src/MessageServer.php"
+ServerUrl = "http://185.27.174.114/1502m/src/webpage/MessageServer.php"
+ShortUrl = "http://tinyurl.com/BudaCam"
 JpegUrl = "http://10.0.0.15/live.jpg"
 SerialDevice = "/dev/ttyUSB0"
 BaudRate = 2400
-StartMessage = "Post uw bericht op " + ServerUrl
+StartMessage = "Post uw bericht op " + ShortUrl
 MaxMessages = 3
 ################
 
 print "Welcome to the 1502m Message Display client"
 print "-------------------------------------------"
 print "Message Server: " + ServerUrl
+print "Short URL: " + ShortUrl
 print "Livestream JPEG URL: " + JpegUrl
 print "Connecting to LED display on " + SerialDevice + " at " + str(BaudRate) + " baud"
 print "Maximum " + str(MaxMessages) + " messsages in queue"
@@ -90,16 +92,31 @@ def ShowMessages():
 		# Print every message ...
 		for Message in Messages:
 			SendToDisplay(Message)
-			print Message
-			time.sleep(5)
+			print colored(Message, "yellow")
+			time.sleep(15)
 
 def LiveStream():
+	# Default sleep between images
+	DefaultSleep = 0.1
+
 	while 1:
-		# First download the image from JpegUrl
-		JpegData = requests.get(JpegUrl, stream=True)
-		# Then upload the image to ServerUrl
-		requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()})
-		time.sleep(0.5)
+		# First download the image from JpegUrl, 5s timeout
+		try:
+			JpegData = requests.get(JpegUrl, stream=True, timeout=5)
+			JpegData.raise_for_status()	# Raise an exception if the status code != 200
+		except Exception, e:
+			print colored("Could not get livestream image: %s" % e, "red")
+			Sleep = 10 # Sleep a bit longer
+		else:
+			# Then upload the image to ServerUrl
+			try:
+				requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()})
+				Sleep = DefaultSleep # Everything went ok, do the short sleep
+			except Exception, e:
+				print colored("Could not upload livestream image: %s" % e, "red")
+				Sleep = 10 # Sleep a bit longer
+
+		time.sleep(Sleep)
 
 # Maximum x messages in deque
 # A deque is a special list: if you add more then the max allowed items, older items are removed.
@@ -117,12 +134,22 @@ thread.start_new_thread(LiveStream, ())
 
 # Endless loop: end the program with CTRL-C
 while True:
-	# Request new messages from server
-	Data = requests.get(ServerUrl + "?messages").text
+	# Default sleep between requests
+	DefaultSleep = 0.5
 
-	# Add them to the MessageList, if there are any
-	if Data.strip() != "":
-		MessageList.extend(Data.strip().split("\n"))
+	# Request new messages from server, 5s timeout
+	try:
+		DataRequest = requests.get(ServerUrl + "?messages", timeout=5)
+		DataRequest.raise_for_status()	# Raise an exception if the status code != 200
+		Sleep = DefaultSleep
+	except Exception, e:
+		print colored("Could not get messages: %s" % e, "red")
+		Sleep = 10
+	else:
+		Data = DataRequest.text
+		# Add them to the MessageList, if there are any
+		if Data.strip() != "":
+			MessageList.extend(Data.strip().split("\n"))
 
 	# We have to sleep a bit or we will be using 100% CPU
-	time.sleep(1)
+	time.sleep(Sleep)
