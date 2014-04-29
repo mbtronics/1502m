@@ -85,12 +85,12 @@ if (Isset($_FILES["live_jpg"]))
 </head>
 
 <body>
-<!--
+
 <div class="header">
 	<img src="BUDALAB-LOGO7-300x102.png">
 	<p><b><i>Electronics Lab</i></b></p>
 </div>
--->
+
 <div class="body">
 	<div align="center">
 		<p>Send messages to our 1502m LED display!</p>
