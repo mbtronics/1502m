@@ -9,8 +9,8 @@ $TimestampFile = "timestamp.txt";
 # The (arbitrary) message length
 $MaxMessageLength = 100;
 
-# User has submitted the form
-if (Isset($_POST['submit']))
+# User has submitted a message
+if (Isset($_POST['message']))
 {
 	# Check for empty or to long messages
 	$Message = trim($_POST['message']);
@@ -85,23 +85,23 @@ if (Isset($_FILES["live_jpg"]))
 </head>
 
 <body>
-
+<!--
 <div class="header">
 	<img src="BUDALAB-LOGO7-300x102.png">
 	<p><b><i>Electronics Lab</i></b></p>
 </div>
-
+-->
 <div class="body">
 	<div align="center">
-		<p>Send messages to our 1502m LED display!</p>
-		DisplayClient status: <span id="status">offline</span>
-		<div id="statusled" style="display: inline-block;" class="led led-red"></div> 
 
-		<form method="POST" action="<?php echo $_SERVER['PHP_SELF']; ?>">
-			<input type="text" name="message" maxlength="<?php echo $MaxMessageLength; ?>" size="30">
-			<input type="submit" name="submit" value="Submit">
-		</form>
-		<br>
+		<p>Send messages to our 1502m LED display!</p>
+		DisplayClient status: <span id="status">online</span>
+		<div id="statusled" style="display: inline-block;" class="led led-green"></div> 
+
+		<p>
+			<input type="text" id="message" maxlength="<?php echo $MaxMessageLength; ?>" size="30">
+			<input type="button" value="Submit" onClick="submitMessage();">
+		</p>
 
 		<canvas id="mjpeg" width="640px" height="480px" style="border:1px solid #d3d3d3"></canvas>
 		<script language="JavaScript">
@@ -139,6 +139,10 @@ if (Isset($_FILES["live_jpg"]))
 						$("#statusled").toggleClass('led-red');
 					}
 				});
+			};
+
+			function submitMessage() {
+				jQuery.post("<?php echo $_SERVER['PHP_SELF']; ?>",{message: $("#message").val()});
 			};
 		</script>
 	</div>
