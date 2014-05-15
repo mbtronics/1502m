@@ -4,7 +4,7 @@
 $MessageFile = "messages.txt";
 
 # Logfile
-$LogFile = "log.txt"
+$LogFile = "log.txt";
 
 # The file in which we store the timestamp from the latest request
 $TimestampFile = "timestamp.txt";
