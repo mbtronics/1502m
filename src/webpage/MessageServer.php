@@ -3,6 +3,9 @@
 # The file we use to store messages
 $MessageFile = "messages.txt";
 
+# Logfile
+$LogFile = "log.txt"
+
 # The file in which we store the timestamp from the latest request
 $TimestampFile = "timestamp.txt";
 
@@ -19,6 +22,7 @@ if (Isset($_POST['message']))
 		# Append message to file with newlne
 		$Message .= "\n";
 		file_put_contents($MessageFile, $Message, FILE_APPEND);
+		file_put_contents($LogFile, $Message, FILE_APPEND);
 	}
 }
 
