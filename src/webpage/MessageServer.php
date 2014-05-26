@@ -24,6 +24,7 @@ if (Isset($_POST['message']))
 		file_put_contents($MessageFile, $Message, FILE_APPEND);
 		file_put_contents($LogFile, $Message, FILE_APPEND);
 	}
+	exit;
 }
 
 # User has asked for new messages
@@ -38,7 +39,6 @@ if (Isset($_GET['messages']))
 
 	# Write timestamp to file
 	file_put_contents($TimestampFile, time());
-
 	exit;
 }
 
@@ -67,6 +67,21 @@ if (Isset($_GET['status']))
 		echo "offline";
 	}
 
+	exit;
+}
+
+if (Isset($_GET['log']))
+{
+	if (file_exists($LogFile))
+	{
+		echo file_get_contents($LogFile);
+	}
+	exit;
+}
+
+if (Isset($_POST['clearlog']))
+{
+	unlink($LogFile);
 	exit;
 }
 
@@ -107,7 +122,17 @@ if (Isset($_FILES["live_jpg"]))
 			<input type="button" value="Submit" onClick="submitMessage();">
 		</p>
 
-		<canvas id="mjpeg" width="640px" height="480px" style="border:1px solid #d3d3d3"></canvas>
+		<table border="0">
+			<tr>
+				<td>
+					<canvas id="mjpeg" width="640px" height="480px" style="border:1px solid #d3d3d3"></canvas>
+				</td>
+				<td>
+					<center><h2>Log: <input type="button" value="Clear log" onClick="clearLog();"></h2></center><textarea id="log" rows="28" cols="50" disabled="1"></textarea>
+				</td>
+			</tr>
+		</table>
+		
 		<script language="JavaScript">
 			var Mjpeg = document.getElementById('mjpeg').getContext('2d');
 			var Img = new Image();
@@ -143,10 +168,18 @@ if (Isset($_FILES["live_jpg"]))
 						$("#statusled").toggleClass('led-red');
 					}
 				});
+
+				jQuery.get("<?php echo $_SERVER['PHP_SELF']; ?>?log&" + Date.now(), function(response) {
+					$("#log").val(response.split("\n").reverse().join("\n"));	
+				});
 			};
 
 			function submitMessage() {
 				jQuery.post("<?php echo $_SERVER['PHP_SELF']; ?>",{message: $("#message").val()});
+			};
+
+			function clearLog() {
+				jQuery.post("<?php echo $_SERVER['PHP_SELF']; ?>",{clearlog: true});
 			};
 		</script>
 	</div>
