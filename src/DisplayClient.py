@@ -11,19 +11,22 @@ import ConfigParser
 from termcolor import colored
 
 ### SETTINGS ###
-Config = ConfigParser.ConfigParser()
-Config.read("DisplayClient.conf")
+try:
+	Config = ConfigParser.ConfigParser()
+	Config.read(sys.argv[1])
 
-ServerUrl = Config.get('GeneralSettings', 'ServerUrl')
-ShortUrl = Config.get('GeneralSettings', 'ShortUrl')
-JpegUrl = Config.get('GeneralSettings', 'JpegUrl')
+	ServerUrl = Config.get('GeneralSettings', 'ServerUrl')
+	ShortUrl = Config.get('GeneralSettings', 'ShortUrl')
+	JpegUrl = Config.get('GeneralSettings', 'JpegUrl')
 
-SerialDevice = Config.get('DisplaySettings', 'SerialDevice')
-BaudRate = Config.getint('DisplaySettings', 'BaudRate')
-StartMessage = Config.get('DisplaySettings', 'StartMessage') + " " + ShortUrl
-MaxMessages = Config.getint('DisplaySettings', 'MaxMessages')
-ShowStartMessage = Config.getboolean('DisplaySettings', 'ShowStartMessage')
-################
+	SerialDevice = Config.get('DisplaySettings', 'SerialDevice')
+	BaudRate = Config.getint('DisplaySettings', 'BaudRate')
+	StartMessage = Config.get('DisplaySettings', 'StartMessage') + " " + ShortUrl
+	MaxMessages = Config.getint('DisplaySettings', 'MaxMessages')
+	ShowStartMessage = Config.getboolean('DisplaySettings', 'ShowStartMessage')
+except Exception, e:
+	print "Could not read config file: " + str(e)
+	sys.exit(-1)
 
 print "Welcome to the 1502m Message Display client"
 print "-------------------------------------------"
