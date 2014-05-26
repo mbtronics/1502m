@@ -7,17 +7,26 @@ import thread
 import sys
 import Queue
 import collections
+import ConfigParser
 from termcolor import colored
 
 ### SETTINGS ###
-ServerUrl = "http://185.27.174.114/1502m/src/webpage/MessageServer.php"
-ShortUrl = "http://tinyurl.com/BudaCam"
-JpegUrl = "http://172.23.5.2/live.jpg"
-SerialDevice = "/dev/ttyUSB0"
-BaudRate = 2400
-StartMessage = "Post uw bericht op " + ShortUrl
-MaxMessages = 3
-################
+try:
+	Config = ConfigParser.ConfigParser()
+	Config.read(sys.argv[1])
+
+	ServerUrl = Config.get('GeneralSettings', 'ServerUrl')
+	ShortUrl = Config.get('GeneralSettings', 'ShortUrl')
+	JpegUrl = Config.get('GeneralSettings', 'JpegUrl')
+
+	SerialDevice = Config.get('DisplaySettings', 'SerialDevice')
+	BaudRate = Config.getint('DisplaySettings', 'BaudRate')
+	StartMessage = Config.get('DisplaySettings', 'StartMessage') + " " + ShortUrl
+	MaxMessages = Config.getint('DisplaySettings', 'MaxMessages')
+	ShowStartMessage = Config.getboolean('DisplaySettings', 'ShowStartMessage')
+except Exception, e:
+	print "Could not read config file: " + str(e)
+	sys.exit(-1)
 
 print "Welcome to the 1502m Message Display client"
 print "-------------------------------------------"
@@ -26,6 +35,8 @@ print "Short URL: " + ShortUrl
 print "Livestream JPEG URL: " + JpegUrl
 print "Connecting to LED display on " + SerialDevice + " at " + str(BaudRate) + " baud"
 print "Maximum " + str(MaxMessages) + " messsages in queue"
+print "Start message: " + StartMessage
+print "Show start message? " + str(ShowStartMessage)
 print
 
 class Special:
@@ -87,7 +98,8 @@ def ShowMessages():
 		# Make a local copy because the list be changed by the main thread,
 		# reverse the list because we want the newest messages first.
 		Messages = list(reversed(MessageList))
-		Messages.append(StartMessage)
+		if ShowStartMessage:
+			Messages.append(StartMessage)
 
 		# Print every message ...
 		for Message in Messages:

@@ -1,0 +1,4 @@
+#!/bin/sh
+LOGFILE=/var/log/displayclient
+date >> $LOGFILE
+stdbuf -oL /home/debian/Git/1502m/src/DisplayClient.py /home/debian/Git/1502m/src/DisplayClient.conf >> $LOGFILE 2>&1 &
