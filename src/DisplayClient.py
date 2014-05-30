@@ -90,7 +90,7 @@ def RemoveNonAscii(s):
 # Send the Message char per char to the display
 # Don't send the string at once, it's to fast for the display
 def SendToDisplay(Message):
-	RemoveNonAscii(Message)
+	Message = RemoveNonAscii(Message)
 	for c in str(Message):
 		SerialPort.write(c)
 
