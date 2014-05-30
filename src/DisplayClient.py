@@ -84,9 +84,13 @@ def Speed(Val):
 		raise Exception("Invalid speed")
 	return Special.Speed + str(Val)
 
+def RemoveNonAscii(s):
+	return "".join(i for i in s if ord(i)<128)
+
 # Send the Message char per char to the display
 # Don't send the string at once, it's to fast for the display
 def SendToDisplay(Message):
+	Message = RemoveNonAscii(Message)
 	for c in str(Message):
 		SerialPort.write(c)
 
@@ -156,7 +160,7 @@ while True:
 		Sleep = DefaultSleep
 	except Exception, e:
 		print colored("Could not get messages: %s" % e, "red")
-		Sleep = 10
+		Sleep = 60
 	else:
 		Data = DataRequest.text
 		# Add them to the MessageList, if there are any

@@ -1,4 +1,26 @@
 #!/bin/sh
+
+PROGDIR=/home/debian/Git/1502m/src/
+CONFIG=$PROGDIR/DisplayClient.conf
 LOGFILE=/var/log/displayclient
-date >> $LOGFILE
-stdbuf -oL /home/debian/Git/1502m/src/DisplayClient.py /home/debian/Git/1502m/src/DisplayClient.conf >> $LOGFILE 2>&1 &
+PIDFILE=/var/run/displayclient
+
+case "$1" in
+  start)
+	date > $LOGFILE
+	stdbuf -oL $PROGDIR/DisplayClient.py $CONFIG >> $LOGFILE 2>&1 &
+	echo $! > $PIDFILE
+	;;
+  stop)
+	kill $( cat $PIDFILE )
+	rm $PIDFILE
+	;;
+  force-reload|restart)
+	$0 stop
+	$0 start
+	;;
+  *)
+	exit 1
+esac
+
+exit 0
