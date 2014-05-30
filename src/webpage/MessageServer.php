@@ -1,5 +1,4 @@
 <?php
-
 # The file we use to store messages
 $MessageFile = "messages.txt";
 
@@ -22,7 +21,8 @@ if (Isset($_POST['message']))
 		# Append message to file with newlne
 		$Message .= "\n";
 		file_put_contents($MessageFile, $Message, FILE_APPEND);
-		file_put_contents($LogFile, $Message, FILE_APPEND);
+		$LogMessage = date('d/m/Y h:i:s') . " " . $Message;
+		file_put_contents($LogFile, $LogMessage, FILE_APPEND);
 	}
 	exit;
 }
@@ -128,7 +128,7 @@ if (Isset($_FILES["live_jpg"]))
 					<canvas id="mjpeg" width="640px" height="480px" style="border:1px solid #d3d3d3"></canvas>
 				</td>
 				<td>
-					<center><h2>Log: <input type="button" value="Clear log" onClick="clearLog();"></h2></center><textarea id="log" rows="28" cols="50" disabled="1"></textarea>
+					<center><h2>Log: <!--<input type="button" value="Clear log" onClick="clearLog();">--></h2></center><textarea id="log" rows="28" cols="50" disabled="1" wrap="off"></textarea>
 				</td>
 			</tr>
 		</table>
