@@ -158,8 +158,6 @@ thread.start_new_thread(ShowMessages, ())
 # Start LiveStream thread
 thread.start_new_thread(LiveStream, ())
 
-sys.exitfunc = SaveMessageList
-
 # Endless loop: end the program with CTRL-C
 while True:
 	# Default sleep between requests
@@ -178,6 +176,7 @@ while True:
 		# Add them to the MessageList, if there are any
 		if Data.strip() != "":
 			MessageList.extend(Data.strip().split("\n"))
+			SaveMessageList()
 
 	# We have to sleep a bit or we will be using 100% CPU
 	time.sleep(Sleep)
