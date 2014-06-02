@@ -90,7 +90,6 @@ def RemoveNonAscii(s):
 # Send the Message char per char to the display
 # Don't send the string at once, it's to fast for the display
 def SendToDisplay(Message):
-	Message = RemoveNonAscii(Message)
 	for c in str(Message):
 		SerialPort.write(c)
 
@@ -107,6 +106,7 @@ def ShowMessages():
 
 		# Print every message ...
 		for Message in Messages:
+			Message = RemoveNonAscii(Message)
 			SendToDisplay(Message)
 			print colored(Message, "yellow")
 			time.sleep(15)
@@ -126,7 +126,8 @@ def LiveStream():
 		else:
 			# Then upload the image to ServerUrl
 			try:
-				requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()})
+				Post = requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()}, timeout=5)
+				Post.raise_for_status()
 				Sleep = DefaultSleep # Everything went ok, do the short sleep
 			except Exception, e:
 				print colored("Could not upload livestream image: %s" % e, "red")
