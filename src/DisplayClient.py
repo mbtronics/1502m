@@ -110,7 +110,6 @@ def ShowMessages():
 
 		# Print every message ...
 		for Message in Messages:
-			Message = RemoveNonAscii(Message)
 			SendToDisplay(Message)
 			#print colored(Message, "yellow")
 			time.sleep(15)
@@ -193,6 +192,7 @@ while True:
 		# Add them to the MessageList, if there are any
 		if Data.strip() != "":
 			Messages = Data.strip().split("\n")
+			Messages = [ RemoveNonAscii(Message) for Message in Messages ]
 			MessageList.extend(Messages)
 			for Message in Messages:		
 				print colored(Message, "yellow")
