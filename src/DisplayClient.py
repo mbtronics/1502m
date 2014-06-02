@@ -8,6 +8,7 @@ import sys
 import Queue
 import collections
 import ConfigParser
+import pickle
 from termcolor import colored
 
 ### SETTINGS ###
@@ -24,6 +25,7 @@ try:
 	StartMessage = Config.get('DisplaySettings', 'StartMessage') + " " + ShortUrl
 	MaxMessages = Config.getint('DisplaySettings', 'MaxMessages')
 	ShowStartMessage = Config.getboolean('DisplaySettings', 'ShowStartMessage')
+	MessageListStore = Config.get('DisplaySettings', 'MessageListStore')
 except Exception, e:
 	print "Could not read config file: " + str(e)
 	sys.exit(-1)
@@ -135,10 +137,17 @@ def LiveStream():
 
 		time.sleep(Sleep)
 
+def SaveMessageList():
+	pickle.dump(MessageList, open(MessageListStore, "wb"))
+
 # Maximum x messages in deque
 # A deque is a special list: if you add more then the max allowed items, older items are removed.
 # This way we always have the x newest messages
-MessageList = collections.deque(maxlen=MaxMessages)
+
+try:
+	MessageList = pickle.load(open(MessageListStore, "rb"))		#Try to load the deque from file
+except:
+	MessageList = collections.deque(maxlen=MaxMessages)
 
 # Open serial port
 SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopbits=1, timeout=None)
@@ -148,6 +157,8 @@ thread.start_new_thread(ShowMessages, ())
 
 # Start LiveStream thread
 thread.start_new_thread(LiveStream, ())
+
+sys.exitfunc = SaveMessageList
 
 # Endless loop: end the program with CTRL-C
 while True:
