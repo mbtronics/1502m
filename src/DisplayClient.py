@@ -3,12 +3,14 @@
 import serial
 import time
 import requests
-import thread
+import threading
 import sys
 import Queue
 import collections
 import ConfigParser
 import pickle
+import signal
+
 from termcolor import colored
 
 ### SETTINGS ###
@@ -99,7 +101,7 @@ def SendToDisplay(Message):
 	SerialPort.write(Special.Enter)
 
 def ShowMessages():
-	while 1:
+	while True:
 		# Make a local copy because the list be changed by the main thread,
 		# reverse the list because we want the newest messages first.
 		Messages = list(reversed(MessageList))
@@ -110,14 +112,14 @@ def ShowMessages():
 		for Message in Messages:
 			Message = RemoveNonAscii(Message)
 			SendToDisplay(Message)
-			print colored(Message, "yellow")
+			#print colored(Message, "yellow")
 			time.sleep(15)
 
 def LiveStream():
 	# Default sleep between images
 	DefaultSleep = 0.5
 
-	while 1:
+	while True:
 		# First download the image from JpegUrl, 5s timeout
 		try:
 			JpegData = requests.get(JpegUrl, stream=True, timeout=5)
@@ -140,6 +142,13 @@ def LiveStream():
 def SaveMessageList():
 	pickle.dump(MessageList, open(MessageListStore, "wb"))
 
+def SignalHandler(signal, frame):
+	print('Bye bye!')
+	sys.exit(0)
+
+# Register CTRL-C handler
+signal.signal(signal.SIGINT, SignalHandler)
+
 # Maximum x messages in deque
 # A deque is a special list: if you add more then the max allowed items, older items are removed.
 # This way we always have the x newest messages
@@ -152,14 +161,22 @@ except:
 # Open serial port
 SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopbits=1, timeout=None)
 
-# Start ShowMessages thread
-thread.start_new_thread(ShowMessages, ())
-
-# Start LiveStream thread
-thread.start_new_thread(LiveStream, ())
+# Threads
+ShowMessagesThread = threading.Thread(target=ShowMessages)	# Start ShowMessages thread
+ShowMessagesThread.daemon = True	#This makes sure the program can exit
+LiveStreamThread = threading.Thread(target=LiveStream)		# Start LiveStream thread
+LiveStreamThread.daemon = True		#This makes sure the program can exit
 
 # Endless loop: end the program with CTRL-C
 while True:
+	if not LiveStreamThread.isAlive():
+		print "Starting LiveStream thread"
+		LiveStreamThread.start()
+
+	if not ShowMessagesThread.isAlive():
+		print "Starting ShowMessages thread"
+		ShowMessagesThread.start()
+
 	# Default sleep between requests
 	DefaultSleep = 0.5
 
@@ -175,7 +192,10 @@ while True:
 		Data = DataRequest.text
 		# Add them to the MessageList, if there are any
 		if Data.strip() != "":
-			MessageList.extend(Data.strip().split("\n"))
+			Messages = Data.strip().split("\n")
+			MessageList.extend(Messages)
+			for Message in Messages:		
+				print colored(Message, "yellow")
 			SaveMessageList()
 
 	# We have to sleep a bit or we will be using 100% CPU
