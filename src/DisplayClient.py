@@ -11,6 +11,10 @@ import ConfigParser
 import pickle
 import signal
 
+#This is debugging code that dumps a stack trace every 5s
+import stacktracer
+stacktracer.trace_start("/tmp/trace.html")
+
 from termcolor import colored
 
 ### SETTINGS ###
