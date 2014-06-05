@@ -10,6 +10,7 @@ import collections
 import ConfigParser
 import pickle
 import signal
+import io
 
 #This is debugging code that dumps a stack trace every 5s
 import stacktracer
@@ -125,15 +126,25 @@ def LiveStream():
 	while True:
 		# First download the image from JpegUrl, 5s timeout
 		try:
-			JpegData = requests.get(JpegUrl, stream=True, timeout=5, headers={'Connection':'close'})
-			JpegData.raise_for_status()	# Raise an exception if the status code != 200
+			JpegReq = requests.get(JpegUrl, stream=True, timeout=5, headers={'Connection':'close'})
+			JpegReq.raise_for_status()	# Raise an exception if the status code != 200
+
+			# Read the data in chuncks into the buffer
+			JpegData = io.BytesIO()
+			for Chunck in JpegReq.iter_content(10*1024):
+				if Chunck:
+					JpegData.write(Chunck)
+
+			# Rewind buffer
+			JpegData.seek(0)
+			
 		except Exception, e:
 			print colored("Could not get livestream image: %s" % e, "red")
 			Sleep = 10 # Sleep a bit longer
 		else:
 			# Then upload the image to ServerUrl
 			try:
-				Post = requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()}, timeout=5, headers={'Connection':'close'})
+				Post = requests.post(ServerUrl, files={'live.jpg': JpegData.read()}, timeout=5, headers={'Connection':'close'})
 				Post.raise_for_status()
 				Sleep = DefaultSleep # Everything went ok, do the short sleep
 			except Exception, e:
