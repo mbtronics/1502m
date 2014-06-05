@@ -125,7 +125,7 @@ def LiveStream():
 	while True:
 		# First download the image from JpegUrl, 5s timeout
 		try:
-			JpegData = requests.get(JpegUrl, stream=True, timeout=5)
+			JpegData = requests.get(JpegUrl, stream=True, timeout=5, headers={'Connection':'close'})
 			JpegData.raise_for_status()	# Raise an exception if the status code != 200
 		except Exception, e:
 			print colored("Could not get livestream image: %s" % e, "red")
@@ -133,7 +133,7 @@ def LiveStream():
 		else:
 			# Then upload the image to ServerUrl
 			try:
-				Post = requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()}, timeout=5)
+				Post = requests.post(ServerUrl, files={'live.jpg': JpegData.raw.read()}, timeout=5, headers={'Connection':'close'})
 				Post.raise_for_status()
 				Sleep = DefaultSleep # Everything went ok, do the short sleep
 			except Exception, e:
@@ -185,7 +185,7 @@ while True:
 
 	# Request new messages from server, 5s timeout
 	try:
-		DataRequest = requests.get(ServerUrl + "?messages", timeout=5)
+		DataRequest = requests.get(ServerUrl + "?messages", timeout=5, headers={'Connection':'close'})
 		DataRequest.raise_for_status()	# Raise an exception if the status code != 200
 		Sleep = DefaultSleep
 	except Exception, e:
