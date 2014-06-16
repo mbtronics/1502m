@@ -96,6 +96,34 @@ def Speed(Val):
 def RemoveNonAscii(s):
 	return "".join(i for i in s if ord(i)<128)
 
+class TimeoutError(Exception): pass
+
+def timelimit(timeout):
+    def internal(function):
+        def internal2(*args, **kw):
+            class Calculator(threading.Thread):
+                def __init__(self):
+                    threading.Thread.__init__(self)
+                    self.result = None
+                    self.error = None
+                
+                def run(self):
+                    try:
+                        self.result = function(*args, **kw)
+                    except:
+                        self.error = sys.exc_info()[0]
+            
+            c = Calculator()
+            c.start()
+            c.join(timeout)
+            if c.isAlive():
+                raise TimeoutError
+            if c.error:
+                raise c.error
+            return c.result
+        return internal2
+    return internal
+
 # Send the Message char per char to the display
 # Don't send the string at once, it's to fast for the display
 def SendToDisplay(Message):
@@ -119,37 +147,44 @@ def ShowMessages():
 			#print colored(Message, "yellow")
 			time.sleep(15)
 
+@timelimit(15)
+def StreamJpeg():
+	# First download the image from JpegUrl, 5s timeout
+	try:
+		JpegReq = requests.get(JpegUrl, stream=True, timeout=5, headers={'Connection':'close'})
+		JpegReq.raise_for_status()	# Raise an exception if the status code != 200
+
+		# Read the data in chuncks into the buffer
+		JpegData = io.BytesIO()
+		for Chunck in JpegReq.iter_content(10*1024):
+			if Chunck:
+				JpegData.write(Chunck)
+
+		# Rewind buffer
+		JpegData.seek(0)
+		
+	except Exception, e:
+		print colored("Could not get livestream image: %s" % e, "red")
+		return False;
+	else:
+		# Then upload the image to ServerUrl
+		try:
+			Post = requests.post(ServerUrl, files={'live.jpg': JpegData.read()}, timeout=5, headers={'Connection':'close'})
+			Post.raise_for_status()
+			return True;
+		except Exception, e:
+			print colored("Could not upload livestream image: %s" % e, "red")
+			return False
+
 def LiveStream():
 	# Default sleep between images
 	DefaultSleep = 0.5
 
 	while True:
-		# First download the image from JpegUrl, 5s timeout
-		try:
-			JpegReq = requests.get(JpegUrl, stream=True, timeout=5, headers={'Connection':'close'})
-			JpegReq.raise_for_status()	# Raise an exception if the status code != 200
-
-			# Read the data in chuncks into the buffer
-			JpegData = io.BytesIO()
-			for Chunck in JpegReq.iter_content(10*1024):
-				if Chunck:
-					JpegData.write(Chunck)
-
-			# Rewind buffer
-			JpegData.seek(0)
-			
-		except Exception, e:
-			print colored("Could not get livestream image: %s" % e, "red")
-			Sleep = 10 # Sleep a bit longer
+		if StreamJpeg():
+			Sleep = DefaultSleep
 		else:
-			# Then upload the image to ServerUrl
-			try:
-				Post = requests.post(ServerUrl, files={'live.jpg': JpegData.read()}, timeout=5, headers={'Connection':'close'})
-				Post.raise_for_status()
-				Sleep = DefaultSleep # Everything went ok, do the short sleep
-			except Exception, e:
-				print colored("Could not upload livestream image: %s" % e, "red")
-				Sleep = 10 # Sleep a bit longer
+			Sleep = 10 # Sleep a bit longer
 
 		time.sleep(Sleep)
 
