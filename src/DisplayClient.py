@@ -181,12 +181,15 @@ def LiveStream():
 	DefaultSleep = 0.5
 
 	while True:
-		if StreamJpeg():
-			Sleep = DefaultSleep
-		else:
-			Sleep = 10 # Sleep a bit longer
+		try:
+			if StreamJpeg():
+				Sleep = DefaultSleep
+			else:
+				Sleep = 10 # Sleep a bit longer
 
-		time.sleep(Sleep)
+			time.sleep(Sleep)
+		except:
+			return
 
 def SaveMessageList():
 	pickle.dump(MessageList, open(MessageListStore, "wb"))
