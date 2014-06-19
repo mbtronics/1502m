@@ -223,11 +223,17 @@ LiveStreamThread.daemon = True		#This makes sure the program can exit
 while True:
 	if not LiveStreamThread.isAlive():
 		print "Starting LiveStream thread"
-		LiveStreamThread.start()
+		try:
+			LiveStreamThread.start()
+		except Exception, e:
+			print e
 
 	if not ShowMessagesThread.isAlive():
 		print "Starting ShowMessages thread"
-		ShowMessagesThread.start()
+		try:
+			ShowMessagesThread.start()
+		except Exception, e:
+			print e
 
 	# Default sleep between requests
 	DefaultSleep = 0.5
