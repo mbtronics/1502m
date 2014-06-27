@@ -213,17 +213,16 @@ except:
 # Open serial port
 SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopbits=1, timeout=None)
 
-# Threads
-ShowMessagesThread = threading.Thread(target=ShowMessages)	# Start ShowMessages thread
-ShowMessagesThread.daemon = True	#This makes sure the program can exit
-LiveStreamThread = threading.Thread(target=LiveStream)		# Start LiveStream thread
-LiveStreamThread.daemon = True		#This makes sure the program can exit
+LiveStreamThread = threading.Thread()
+ShowMessagesThread = threading.Thread()
 
 # Endless loop: end the program with CTRL-C
 while True:
 	if not LiveStreamThread.isAlive():
 		print "Starting LiveStream thread"
 		try:
+			LiveStreamThread = threading.Thread(target=LiveStream)		# Start LiveStream thread
+			LiveStreamThread.daemon = True		#This makes sure the program can exit
 			LiveStreamThread.start()
 		except Exception, e:
 			print e
@@ -231,6 +230,8 @@ while True:
 	if not ShowMessagesThread.isAlive():
 		print "Starting ShowMessages thread"
 		try:
+			ShowMessagesThread = threading.Thread(target=ShowMessages)	# Start ShowMessages thread
+			ShowMessagesThread.daemon = True	#This makes sure the program can exit
 			ShowMessagesThread.start()
 		except Exception, e:
 			print e
