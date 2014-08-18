@@ -33,6 +33,7 @@ try:
 	MaxMessages = Config.getint('DisplaySettings', 'MaxMessages')
 	ShowStartMessage = Config.getboolean('DisplaySettings', 'ShowStartMessage')
 	MessageListStore = Config.get('DisplaySettings', 'MessageListStore')
+	DisplayTime = Config.get('DisplaySettings', 'DisplayTime')
 except Exception, e:
 	print "Could not read config file: " + str(e)
 	sys.exit(-1)
@@ -135,19 +136,8 @@ def SendToDisplay(Message):
 
 def ShowMessages():
 	while True:
-		# Make a local copy because the list be changed by the main thread,
-		# reverse the list because we want the newest messages first.
-		#Messages = list(reversed(MessageList))		
-		#if ShowStartMessage:
-		#	Messages.append(StartMessage)
-
-		# Print every message ...
-		#for Message in Messages:
-		#	SendToDisplay(Message)
-		#	#print colored(Message, "yellow")
-		#	time.sleep(15)
 		SendToDisplay(Text)
-		time.sleep(60)
+		time.sleep(DisplayTime)
 
 @timelimit(15)
 def StreamJpeg():
@@ -212,7 +202,7 @@ try:
 except:
 	MessageList = collections.deque(maxlen=MaxMessages)
 
-Text = ""
+Text = StartMessage	+ str(Special.WipeCenter)
 
 # Open serial port
 SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopbits=1, timeout=None)
@@ -263,11 +253,10 @@ while True:
 			SaveMessageList()
 
 			if ShowStartMessage:
-				Text = StartMessage			
+				Text = StartMessage	+ str(Special.WipeCenter)
 
 			for Message in list(reversed(MessageList)):
-				Text += Special.WipeCenter				
-				Text += Message
+				Text += Message + str(Special.WipeCenter)
 
 	# We have to sleep a bit or we will be using 100% CPU
 	time.sleep(Sleep)
