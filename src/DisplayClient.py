@@ -137,15 +137,17 @@ def ShowMessages():
 	while True:
 		# Make a local copy because the list be changed by the main thread,
 		# reverse the list because we want the newest messages first.
-		Messages = list(reversed(MessageList))
-		if ShowStartMessage:
-			Messages.append(StartMessage)
+		#Messages = list(reversed(MessageList))		
+		#if ShowStartMessage:
+		#	Messages.append(StartMessage)
 
 		# Print every message ...
-		for Message in Messages:
-			SendToDisplay(Message)
-			#print colored(Message, "yellow")
-			time.sleep(15)
+		#for Message in Messages:
+		#	SendToDisplay(Message)
+		#	#print colored(Message, "yellow")
+		#	time.sleep(15)
+		SendToDisplay(Text)
+		time.sleep(60)
 
 @timelimit(15)
 def StreamJpeg():
@@ -210,6 +212,8 @@ try:
 except:
 	MessageList = collections.deque(maxlen=MaxMessages)
 
+Text = ""
+
 # Open serial port
 SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopbits=1, timeout=None)
 
@@ -257,6 +261,13 @@ while True:
 			for Message in Messages:		
 				print colored(Message, "yellow")
 			SaveMessageList()
+
+			if ShowStartMessage:
+				Text = StartMessage			
+
+			for Message in list(reversed(MessageList)):
+				Text += WipeCenter				
+				Text += Message
 
 	# We have to sleep a bit or we will be using 100% CPU
 	time.sleep(Sleep)
