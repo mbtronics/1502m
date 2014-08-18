@@ -235,11 +235,11 @@ while True:
 				print colored(Message, "yellow")
 			SaveMessageList()
 
-			if ShowStartMessage:
-				Text = StartMessage	+ str(Special.WipeCenter)
-
 			for Message in list(reversed(MessageList)):
 				Text += Message + str(Special.WipeCenter)
+
+			if ShowStartMessage:
+				Text = StartMessage	+ str(Special.WipeCenter)
 
 			SendToDisplay(Text)
 			Sleep = DisplayTime

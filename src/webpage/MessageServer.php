@@ -5,9 +5,6 @@ $MessageFile = "messages.txt";
 # Logfile
 $LogFile = "log.txt";
 
-# The file in which we store the timestamp from the latest request
-$TimestampFile = "timestamp.txt";
-
 # The (arbitrary) message length
 $MaxMessageLength = 100;
 
@@ -37,8 +34,6 @@ if (Isset($_GET['messages']))
 		unlink($MessageFile);
 	}
 
-	# Write timestamp to file
-	file_put_contents($TimestampFile, time());
 	exit;
 }
 
@@ -46,10 +41,9 @@ if (Isset($_GET['messages']))
 if (Isset($_GET['status']))
 {
 	$Status = False;
-	if (file_exists($TimestampFile))
+	if (file_exists("live.jpg"))
 	{
-		# Read timestamp from file
-		$Timestamp = intval(file_get_contents($TimestampFile));
+		$Timestamp = filemtime("live.jpg");
 
 		# Check if timestamp is less then 5s ago
 		if ($Timestamp >= time()-5)
