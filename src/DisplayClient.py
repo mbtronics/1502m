@@ -33,7 +33,7 @@ try:
 	MaxMessages = Config.getint('DisplaySettings', 'MaxMessages')
 	ShowStartMessage = Config.getboolean('DisplaySettings', 'ShowStartMessage')
 	MessageListStore = Config.get('DisplaySettings', 'MessageListStore')
-	DisplayTime = Config.get('DisplaySettings', 'DisplayTime')
+	DisplayTime = Config.getint('DisplaySettings', 'DisplayTime')
 except Exception, e:
 	print "Could not read config file: " + str(e)
 	sys.exit(-1)
