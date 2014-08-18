@@ -134,11 +134,6 @@ def SendToDisplay(Message):
 	# Confirm the new Message
 	SerialPort.write(Special.Enter)
 
-def ShowMessages():
-	while True:
-		SendToDisplay(Text)
-		time.sleep(DisplayTime)
-
 @timelimit(15)
 def StreamJpeg():
 	# First download the image from JpegUrl, 5s timeout
@@ -202,13 +197,10 @@ try:
 except:
 	MessageList = collections.deque(maxlen=MaxMessages)
 
-Text = StartMessage	+ str(Special.WipeCenter)
-
 # Open serial port
 SerialPort = serial.Serial(SerialDevice, BaudRate, bytesize=8, parity='E', stopbits=1, timeout=None)
 
 LiveStreamThread = threading.Thread()
-ShowMessagesThread = threading.Thread()
 
 # Endless loop: end the program with CTRL-C
 while True:
@@ -218,15 +210,6 @@ while True:
 			LiveStreamThread = threading.Thread(target=LiveStream)		# Start LiveStream thread
 			LiveStreamThread.daemon = True		#This makes sure the program can exit
 			LiveStreamThread.start()
-		except Exception, e:
-			print e
-
-	if not ShowMessagesThread.isAlive():
-		print "Starting ShowMessages thread"
-		try:
-			ShowMessagesThread = threading.Thread(target=ShowMessages)	# Start ShowMessages thread
-			ShowMessagesThread.daemon = True	#This makes sure the program can exit
-			ShowMessagesThread.start()
 		except Exception, e:
 			print e
 
@@ -258,5 +241,7 @@ while True:
 			for Message in list(reversed(MessageList)):
 				Text += Message + str(Special.WipeCenter)
 
-	# We have to sleep a bit or we will be using 100% CPU
+			SendToDisplay(Text)
+			Sleep = DisplayTime
+
 	time.sleep(Sleep)
