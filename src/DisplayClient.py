@@ -266,7 +266,7 @@ while True:
 				Text = StartMessage			
 
 			for Message in list(reversed(MessageList)):
-				Text += WipeCenter				
+				Text += Special.WipeCenter				
 				Text += Message
 
 	# We have to sleep a bit or we will be using 100% CPU
