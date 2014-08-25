@@ -235,7 +235,7 @@ while True:
 				print colored(Message, "yellow")
 			SaveMessageList()
 
-			Text = str(Special.WipeCenter)
+			Text = str(Speed(2)) + str(Special.WipeCenter)
 			for Message in list(reversed(MessageList)):
 				Text += Message + str(Special.WipeCenter)
 
