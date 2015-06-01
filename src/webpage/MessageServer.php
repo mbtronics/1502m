@@ -129,14 +129,15 @@ if (Isset($_FILES["live_jpg"]))
 		
 		<script language="JavaScript">
 			var Mjpeg = document.getElementById('mjpeg').getContext('2d');
-			var Img = new Image();
+			var Img = new Array();
+			var DisplayBuf = 0;
+			var NumBuffers = 5;
+			var LoadBuf = NumBuffers-1;
 
-			Img.onload = function() {
-				Mjpeg.drawImage(Img, 0, 0);
-		  	};
-
-		  	Img.src = "live.jpg";
-
+			for (i=0; i<NumBuffers; i++) {
+				Img[i] = new Image();
+			}
+			
 			window.setInterval("doTimedStuff()", 500);
 
 			function doTimedStuff() {
@@ -145,8 +146,20 @@ if (Isset($_FILES["live_jpg"]))
 			};
 
 			function refreshCanvas() {
-				Img.src = "live.jpg?" + Date.now();
-				Mjpeg.drawImage(Img, 0, 0);
+				Img[LoadBuf].src = "live.jpg?" + Date.now();
+				Mjpeg.drawImage(Img[DisplayBuf], 0, 0);
+
+				LoadBuf++;
+				if (LoadBuf==NumBuffers) {
+					LoadBuf=0;
+				}
+
+				DisplayBuf++;
+				if (DisplayBuf==NumBuffers) {
+					DisplayBuf=0;
+				}
+
+				console.log("Load " + LoadBuf + " Disp " + DisplayBuf)
 			};
 
 			function updateStatus() {
