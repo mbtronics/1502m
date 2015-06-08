@@ -136,6 +136,9 @@ if (Isset($_FILES["live_jpg"]))
 
 			for (i=0; i<NumBuffers; i++) {
 				Img[i] = new Image();
+				Img[i].onload = function () {
+					Mjpeg.drawImage(Img[DisplayBuf], 0, 0);
+				}
 			}
 			
 			window.setInterval("doTimedStuff()", 500);
@@ -147,7 +150,6 @@ if (Isset($_FILES["live_jpg"]))
 
 			function refreshCanvas() {
 				Img[LoadBuf].src = "live.jpg?" + Date.now();
-				Mjpeg.drawImage(Img[DisplayBuf], 0, 0);
 
 				LoadBuf++;
 				if (LoadBuf==NumBuffers) {
